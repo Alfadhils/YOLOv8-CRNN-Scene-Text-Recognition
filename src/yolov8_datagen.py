@@ -14,7 +14,7 @@ def get_input_args():
     Returns:
         argparse.Namespace: Parsed arguments.
     """
-    parser = argparse.ArgumentParser(description="YOLOv8 Dataset Creator")
+    parser = argparse.ArgumentParser(description="YOLOv8 Dataset Generator")
     parser.add_argument("--source_dir", type=str, default='datasets/archive', help="Source directory path")
     parser.add_argument("--dest_dir", type=str, default='datasets/custom-dataset', help="Destination directory path")
     parser.add_argument("--total_images", type=int, default=5000, help="Total number of images")
@@ -22,10 +22,10 @@ def get_input_args():
     parser.add_argument("--split", nargs='+', type=float, default=[0.9, 0.05, 0.05], help="Dataset split ratios (train, val, test)")
     return parser.parse_args()
 
-class YOLOv8DatasetCreator:
+class YOLOv8DatasetGenerator:
     def __init__(self, source_dir, dest_dir, total_images, density, split):
         """
-        Initialize YOLOv8DatasetCreator.
+        Initialize YOLOv8DatasetGenerator.
 
         Args:
             source_dir (str): Source directory path.
@@ -107,9 +107,9 @@ class YOLOv8DatasetCreator:
 
         return config
 
-    def main(self):
+    def generate(self):
         """
-        Main function to create YOLOv8 dataset.
+        Generate YOLOv8 dataset.
         """
         imgs = pd.read_parquet(os.path.join(self.source_dir, 'img.parquet'))
         annots = pd.read_parquet(os.path.join(self.source_dir, 'annot.parquet'))
@@ -143,8 +143,15 @@ class YOLOv8DatasetCreator:
         # Create the YAML configuration file for YOLOv8 training
         print(f"Creating YOLOv8 dataset configuration at {self.dest_dir}")
         config = self.create_dataset_config(self.dest_dir)
+        
+def main():
+    """
+        Main function to generate YOLOv8 dataset using user input.
+    """
+    args = get_input_args()
+    dataset_creator = YOLOv8DatasetGenerator(args.source_dir, args.dest_dir, args.total_images, args.density, args.split)
+    dataset_creator.generate()
+    
 
 if __name__ == "__main__":
-    args = get_input_args()
-    dataset_creator = YOLOv8DatasetCreator(args.source_dir, args.dest_dir, args.total_images, args.density, args.split)
-    dataset_creator.main()
+    main()

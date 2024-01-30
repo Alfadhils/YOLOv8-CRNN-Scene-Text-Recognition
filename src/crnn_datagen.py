@@ -14,16 +14,16 @@ def get_input_args():
     Returns:
         argparse.Namespace: Parsed arguments.
     """
-    parser = argparse.ArgumentParser(description="YOLOv8 Dataset Creator")
+    parser = argparse.ArgumentParser(description="YOLOv8 Dataset Generator")
     parser.add_argument("--source_dir", type=str, default='../datasets/archive', help="Source directory path")
     parser.add_argument("--dest_dir", type=str, default='../datasets/cropped_text', help="Destination directory path")
     parser.add_argument("--total_images", type=int, default=10000, help="Total number of images")
     return parser.parse_args()
 
-class TRDatasetCreator:
+class TRDatasetGenerator:
     def __init__(self, source_dir, dest_dir, total_images):
         """
-        Initialize TRDatasetCreator.
+        Initialize TRDatasetGenerator.
 
         Args:
             source_dir (str): Source directory path.
@@ -62,9 +62,9 @@ class TRDatasetCreator:
         
         return dest_path
 
-    def main(self):
+    def generate(self):
         """
-        Main function to create Text Recognition dataset.
+        Generate Text Recognition dataset.
         """
         annots = pd.read_parquet(os.path.join(self.source_dir, 'annot.parquet'))
         annots['utf8_string'] = annots['utf8_string'].apply(lambda x: re.sub(r'[^a-zA-Z0-9\s]', '', x))
@@ -79,7 +79,14 @@ class TRDatasetCreator:
             
         annots[['id','utf8_string']].to_csv(os.path.join(self.dest_dir,'labels.csv'),index=False)
 
-if __name__ == "__main__":
+def main():
+    """
+        Main function to generate dataset using user input.
+    """
     args = get_input_args()
-    dataset_creator = TRDatasetCreator(args.source_dir, args.dest_dir, args.total_images)
-    dataset_creator.main()
+    dataset_creator = TRDatasetGenerator(args.source_dir, args.dest_dir, args.total_images)
+    dataset_creator.generate()
+    
+
+if __name__ == "__main__":
+    main()
