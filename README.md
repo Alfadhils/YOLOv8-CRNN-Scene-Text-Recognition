@@ -41,6 +41,11 @@ pip install -r requirements.txt
 
 Feel free to customize and adapt the code to fit your specific requirements. If you encounter any issues or have suggestions for improvement, please open an issue or submit a pull request.
 
+## References
+This project are heavliy inspired by Ultralytics and CRNN-Pytorch Github Repo:
+1. [Ultralytics](https://github.com/ultralytics/ultralytics)
+2. [CRNN-Pytorch](https://github.com/GitYCC/crnn-pytorch)
+
 ## Contact
 
 For any inquiries or feedback, please contact Fadhil Umar at [[fadhilumaraf.9a@gmail.com](mailto:fadhilumaraf.9a@gmail.com)].
