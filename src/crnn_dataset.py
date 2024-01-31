@@ -118,7 +118,7 @@ def collate_batch(batch):
     target_lengths = torch.cat(target_lengths, 0)
     return images, targets, target_lengths
 
-def get_split(root_dir=None, labels=None, img_width=100, img_height=32, batch_size=64, splits=[0.98, 0.01, 0.01]):
+def get_split(root_dir=None, labels=None, set=None, img_width=100, img_height=32, batch_size=64, splits=[0.98, 0.01, 0.01]):
     """
     Create data loaders for training, validation, and testing.
 
@@ -144,5 +144,12 @@ def get_split(root_dir=None, labels=None, img_width=100, img_height=32, batch_si
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_batch)
     val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_batch)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1, shuffle=False, collate_fn=collate_batch)
+    
+    if set == 'train' :
+        return train_loader
+    elif set == 'val' :
+        return val_loader
+    elif set == 'test' :
+        return test_loader
     
     return train_loader, val_loader, test_loader
