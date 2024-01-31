@@ -1,4 +1,4 @@
 datasets/
-runs/detect/predict/
-street.mp4
-example.png
+runs/
+demo/
+src/__pycache__/
