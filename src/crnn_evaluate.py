@@ -1,10 +1,10 @@
 import torch
 from torch import nn
-from src.crnn_decoder import ctc_decode
 from tqdm import tqdm
 
 from crnn_dataset import get_split, TRDataset
 from crnn_model import CRNN
+from crnn_decoder import ctc_decode
 
 import argparse
 
@@ -16,9 +16,7 @@ def get_input_args():
         argparse.Namespace: Parsed arguments.
     """
     parser = argparse.ArgumentParser(description="YOLOv8 Dataset Generator")
-    parser.add_argument("--source_dir", type=str, default='../datasets/archive', help="Source directory path")
-    parser.add_argument("--dest_dir", type=str, default='../datasets/cropped_text', help="Destination directory path")
-    parser.add_argument("--total_images", type=int, default=10000, help="Total number of images")
+    parser.add_argument("--cp_path", type=str, default=None, help="Configuration checkpoint path.")
     return parser.parse_args()
 
 def evaluate(crnn, dataloader, criterion, max_iter=None):
@@ -86,34 +84,49 @@ def evaluate(crnn, dataloader, criterion, max_iter=None):
     return evaluation
 
 def main():
+    args = get_input_args()
     
-    img_height, img_width = 32,100
-    
-    val_loader = get_split(root_dir="datasets/TR_100k",
-                           labels="labels.csv",
-                           set='val',
-                           img_width=img_width,
-                           img_height=img_height,
-                           batch_size=64,
-                           splits=[0.98,0.01,0.01])
-    
+    reload_checkpoint = args.cp_path
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     
-    num_class = len(TRDataset.LABEL2CHAR) + 1
-    crnn = CRNN(1, img_height, img_width, num_class,
-                map_to_seq=64,
-                rnn_hidden=256)
-    
-    reload_checkpoint = 'checkpoints/crnn_100k.pt'
     if reload_checkpoint:
-        crnn.load_state_dict(torch.load(reload_checkpoint, map_location=device))
+        config = torch.load(reload_checkpoint, map_location=device)
+    else :
+        config = {
+            'state_dict' : None,
+            'img_height' : 32,
+            'img_width' : 100,
+            'batch_size' : 64,
+            'root_dir' : "datasets/TR_100k",
+            'labels' : "labels.csv",
+            'splits' : [0.98,0.01,0.01],
+            'map_to_seq' : 64,
+            'rnn_hidden' : 256
+        }
+    
+    val_loader = get_split(root_dir=config['root_dir'],
+                           labels=config['labels'],
+                           set='val',
+                           img_width=config['img_width'],
+                           img_height=config['img_height'],
+                           batch_size=config['batch_size'],
+                           splits=config['splits'])
+    
+    num_class = len(TRDataset.LABEL2CHAR) + 1
+    
+    crnn = CRNN(1, config['img_height'], config['img_width'], num_class,
+                map_to_seq=config['map_to_seq'],
+                rnn_hidden=config['rnn_hidden'])
+
+    if config['state_dict']:
+        crnn.load_state_dict(config['state_dict'])
+
     crnn.to(device)
     
     criterion = nn.CTCLoss(reduction='sum', zero_infinity=True)
-    optimizer = torch.optim.Adam(crnn.parameters(), lr=0.0005)
     
+    print(f"Evaluating [{config['root_dir']}] using {device}")
     evaluation = evaluate(crnn, val_loader, criterion)
-    print(f'Evaluating [{reload_checkpoint}] using {device}')
     print(f"Val Loss : {evaluation['loss']:.4f}, Val Acc: {evaluation['acc']}")
     
 if __name__ == "__main__":
