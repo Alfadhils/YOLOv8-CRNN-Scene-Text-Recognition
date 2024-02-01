@@ -16,7 +16,7 @@ class TRDataset(torch.utils.data.Dataset):
     CHAR2LABEL = {char: i + 1 for i, char in enumerate(CHARS)}
     LABEL2CHAR = {label: char for char, label in CHAR2LABEL.items()}
     
-    def __init__(self, root_dir=None, labels=None, paths=None, img_height=32, img_width=100):
+    def __init__(self, root_dir=None, labels=None, images=None, paths=None, img_height=32, img_width=100):
         """
         Initialize the dataset. Use root_dir and labels for train/val, use paths for inference.
 
@@ -29,9 +29,15 @@ class TRDataset(torch.utils.data.Dataset):
         """
         self.img_height = img_height
         self.img_width = img_width
+        self.img_paths = None
+        self.labels = None
+        self.image = False
 
         if paths:
             self.img_paths = paths
+        elif images :
+            self.img_paths = images
+            self.image = True
         else:
             self.img_paths, self.labels = self.read_labels(root_dir, labels)
 
@@ -54,13 +60,16 @@ class TRDataset(torch.utils.data.Dataset):
         Returns:
             tuple: A tuple containing the image tensor and, if labels are available, target and target length tensors.
         """
-        img_path = self.img_paths[idx]
+        if self.image:
+            image = self.img_paths[idx].convert('L')
+        else :
+            img_path = self.img_paths[idx]
         
-        try:
-            image = Image.open(img_path).convert('L')
-        except IOError:
-            print('Corrupted image for %d' % idx)
-            return self[idx + 1]
+            try:
+                image = Image.open(img_path).convert('L')
+            except IOError:
+                print('Corrupted image for %d' % idx)
+                return self[idx + 1]
         
         image = image.resize((self.img_width, self.img_height), resample=Image.BILINEAR)
         image = np.array(image)
