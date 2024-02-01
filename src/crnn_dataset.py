@@ -61,21 +61,17 @@ class TRDataset(torch.utils.data.Dataset):
             tuple: A tuple containing the image tensor and, if labels are available, target and target length tensors.
         """
         if self.image:
-            image = self.img_paths[idx].convert('L')
+            image = self.img_paths[idx]
         else :
             img_path = self.img_paths[idx]
         
             try:
-                image = Image.open(img_path).convert('L')
+                image = Image.open(img_path)
             except IOError:
                 print('Corrupted image for %d' % idx)
                 return self[idx + 1]
         
-        image = image.resize((self.img_width, self.img_height), resample=Image.BILINEAR)
-        image = np.array(image)
-        image = image.reshape((1, self.img_height, self.img_width))
-        image = (image / 127.5) - 1.0
-        image = torch.FloatTensor(image)
+        image = preprocess(image, self.img_height, self.img_width)
         
         if self.labels:
             label = self.labels[idx]
@@ -126,6 +122,26 @@ def collate_batch(batch):
     targets = torch.cat(targets, 0)
     target_lengths = torch.cat(target_lengths, 0)
     return images, targets, target_lengths
+
+def preprocess(img, height, width):
+    """
+    Preprocess image
+    
+    Parameters:
+    - img (PIL.Image): The input image
+    - height (int): Desired height of the preprocessed image
+    - width (int): Desired width of the preprocessed image
+    
+    Returns:
+    - torch.FloatTensor: Preprocessed image tensor
+    """
+    
+    image = img.convert('L')
+    image = image.resize((width, height), resample=Image.BILINEAR)
+    image = np.array(image)
+    image = image.reshape((1, height, width))
+    image = (image / 127.5) - 1.0
+    return torch.FloatTensor(image)
 
 def get_split(root_dir=None, labels=None, set=None, img_width=100, img_height=32, batch_size=64, splits=[0.98, 0.01, 0.01]):
     """
