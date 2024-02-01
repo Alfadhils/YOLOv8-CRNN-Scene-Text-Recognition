@@ -53,6 +53,7 @@ def main():
     if reload_checkpoint:
         config = torch.load(reload_checkpoint, map_location=device)
     else :
+        print("No checkpoint found, using default configuration.")
         config = {
             'state_dict' : None,
             'img_height' : 32,
@@ -91,6 +92,8 @@ def main():
     epochs = args.epochs
     show_interval = args.show_interval
     
+    print(f"Training [{config['root_dir']}] using {device} for {epochs} epochs")
+    
     train_losses = []
     val_losses = []
     val_accs = []
@@ -122,6 +125,8 @@ def main():
     final_eval = evaluate(crnn, val_loader, criterion)
     print(f"Val Loss : {final_eval['loss']:.4f}, Val Acc: {final_eval['acc']}")
     
+    config['state_dict'] = crnn.state_dict()
+    
     df = pd.DataFrame({
         'epoch': range(1, epochs + 1),
         'train_loss': train_losses,
@@ -132,13 +137,16 @@ def main():
     save_dir = os.path.join('runs', 'crnn_train')
     os.makedirs(save_dir, exist_ok=True)
 
-    save_path = os.path.join(save_dir, 'train.csv')
+    save_path = os.path.join(save_dir, 'train')
     i = 1
     while os.path.exists(save_path):
-        save_path = os.path.join(save_dir, f'train{i}.csv')
+        save_path = os.path.join(save_dir, f'train{i}')
         i += 1
+    
+    os.makedirs(save_path, exist_ok=True)
         
-    df.to_csv(save_path)
+    df.to_csv(os.path.join(save_path,'results.csv'), index = False)
+    torch.save(config,os.path.join(save_path,'train_config.pt'))
     print(f'Results saved at {save_path}')
     
 if __name__ == "__main__":
