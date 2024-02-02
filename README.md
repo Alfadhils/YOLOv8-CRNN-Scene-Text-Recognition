@@ -117,7 +117,7 @@ python src/predict.py --detector checkpoints/yolov8_5k.pt --recognizer checkpoin
    - **Accuracy:**
       - Validation Accuracy: 58%
 
-for more information about training and dataset generation refer to source code.
+for more information about training, evaluation, and dataset generation refer to source code.
 
 ## Dependencies
 
