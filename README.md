@@ -87,6 +87,38 @@ python src/predict.py --detector checkpoints/yolov8_5k.pt --recognizer checkpoin
 python src/predict.py --detector checkpoints/yolov8_5k.pt --recognizer checkpoints/crnn_s100k.pt --source demo/street.mp4
 ```
 
+## Results 
+1. YOLOv8 Small Model for Text Detection
+   - **Training Details:**
+      - Model: YOLOv8 Small
+      - Fine-tuned on 5,000 images from the TextOCR dataset
+      - Training Epochs: 20
+
+   - **Losses:**
+      - Train Box Loss: 1.305
+      - Validation Box Loss: 1.2908
+
+   - **Performance Metrics:**
+      - Mean Average Precision (mAP50): 67.559%
+
+2. CRNN Pretrained Model for Text Recognition
+
+   - **Training Details:**
+      - Model: CRNN
+      - Pretrained on synth90k dataset [link](https://github.com/GitYCC/crnn-pytorch)
+      - Fine-tuned on 100,000 cropped text images from the TextOCR dataset
+      - Training Epochs: 5
+      - CTC Decoder: Greedy algorithm for faster inference time
+
+   - **Losses:**
+      - Train CTC Loss: 5.948
+      - Validation CTC Loss: 4.664
+
+   - **Accuracy:**
+      - Validation Accuracy: 58%
+
+for more information about training and dataset generation refer to source code.
+
 ## Dependencies
 
 Ensure all necessary dependencies are installed by running:
@@ -104,6 +136,34 @@ This project are heavliy inspired by Ultralytics and CRNN-Pytorch Github Repo:
 3. Original CRNN Research Paper [CRNN](https://arxiv.org/abs/1507.05717)
 4. TextOCR - Text Extraction from Images Dataset, Kaggle Link [TextOCR](https://www.kaggle.com/datasets/robikscube/textocr-text-extraction-from-images-dataset/data)
 
+## Citations
+```
+@software{Jocher_Ultralytics_YOLO_2023,
+      author = {Jocher, Glenn and Chaurasia, Ayush and Qiu, Jing},
+      license = {AGPL-3.0},
+      month = jan,
+      title = {{Ultralytics YOLO}},
+      url = {https://github.com/ultralytics/ultralytics},
+      version = {8.0.0},
+      year = {2023}
+}
+
+@inproceedings{singh2021textocr,
+      title={{TextOCR}: Towards large-scale end-to-end reasoning for arbitrary-shaped scene text},
+      author={Singh, Amanpreet and Pang, Guan and Toh, Mandy and Huang, Jing and Galuba, Wojciech and Hassner, Tal},
+      journal={The Conference on Computer Vision and Pattern Recognition},
+      year={2021}
+}
+
+@misc{shi2015endtoend,
+      title={An End-to-End Trainable Neural Network for Image-based Sequence Recognition and Its Application to Scene Text Recognition}, 
+      author={Baoguang Shi and Xiang Bai and Cong Yao},
+      year={2015},
+      eprint={1507.05717},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+```
 ## Contact
 
 For any inquiries or feedback, please contact Fadhil Umar at [[fadhilumaraf.9a@gmail.com](mailto:fadhilumaraf.9a@gmail.com)].
