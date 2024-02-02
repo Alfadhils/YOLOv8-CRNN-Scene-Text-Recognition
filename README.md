@@ -4,20 +4,20 @@ This repository is dedicated to implementing Deep Learning-based Scene Text Reco
 
 Download or use the Kaggle API to download and extract the dataset. initialize the dataset by storing the extracted Kaggle dataset in `datasets` directory. The directory should look something like this.
 
-├── datasets
-│   └── archive
-│       ├── train_val_images
-│       │   └── train_images
-│       │       ├── img1.jpg
-│       │       ├── img2.jpg
-│       │       └── ... 
-│       ├── annot.csv
-│       ├── annot.parquet
-│       ├── img.csv
-│       ├── img.parquet
-│       └── TextOCR_0.1_train.json
-├── demo
-└── ...
+├── datasets  
+│   └── archive  
+│       ├── train_val_images  
+│       │   └── train_images  
+│       │       ├── img1.jpg  
+│       │       ├── img2.jpg  
+│       │       └── ...   
+│       ├── annot.csv  
+│       ├── annot.parquet  
+│       ├── img.csv  
+│       ├── img.parquet  
+│       └── TextOCR_0.1_train.json  
+├── demo  
+└── ...  
 
 
 ## Scripts and Notebooks
