@@ -7,6 +7,8 @@ import shutil
 import yaml
 from tqdm import tqdm
 
+np.random.seed(42)
+
 def get_input_args():
     """
     Get command-line arguments using argparse.
@@ -18,12 +20,11 @@ def get_input_args():
     parser.add_argument("--source_dir", type=str, default='datasets/archive', help="Source directory path")
     parser.add_argument("--dest_dir", type=str, default='datasets/custom-dataset', help="Destination directory path")
     parser.add_argument("--total_images", type=int, default=5000, help="Total number of images")
-    parser.add_argument("--density", type=int, default=2, help="Density factor")
     parser.add_argument("--split", nargs='+', type=float, default=[0.9, 0.05, 0.05], help="Dataset split ratios (train, val, test)")
     return parser.parse_args()
 
 class YOLOv8DatasetGenerator:
-    def __init__(self, source_dir, dest_dir, total_images, density, split):
+    def __init__(self, source_dir, dest_dir, total_images, split):
         """
         Initialize YOLOv8DatasetGenerator.
 
@@ -37,7 +38,6 @@ class YOLOv8DatasetGenerator:
         self.source_dir = source_dir
         self.dest_dir = dest_dir
         self.total_images = total_images
-        self.density = density
         self.split = split
         self.annots = None  # Placeholder for annotations dataframe
 
@@ -118,7 +118,7 @@ class YOLOv8DatasetGenerator:
         annots['utf8_string'] = annots['utf8_string'].apply(lambda x: re.sub(r'[^a-zA-Z0-9\s]', '', x))
         annots = annots[annots['utf8_string'].apply(lambda x: len(x) > 1)].reset_index(drop=True)
 
-        selected_ids = annots['image_id'].value_counts()[:self.density * self.total_images:self.density].index
+        selected_ids = np.random.choice(annots['image_id'].unique(), size=self.total_images, replace=False)
 
         # Filter selected images and annotations
         annots = annots[annots['image_id'].isin(selected_ids)].reset_index(drop=True)
@@ -149,7 +149,7 @@ def main():
         Main function to generate YOLOv8 dataset using user input.
     """
     args = get_input_args()
-    dataset_creator = YOLOv8DatasetGenerator(args.source_dir, args.dest_dir, args.total_images, args.density, args.split)
+    dataset_creator = YOLOv8DatasetGenerator(args.source_dir, args.dest_dir, args.total_images, args.split)
     dataset_creator.generate()
     
 

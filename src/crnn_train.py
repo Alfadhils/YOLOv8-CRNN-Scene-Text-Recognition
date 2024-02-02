@@ -17,7 +17,7 @@ def get_input_args():
     Returns:
         argparse.Namespace: Parsed arguments.
     """
-    parser = argparse.ArgumentParser(description="YOLOv8 Dataset Generator")
+    parser = argparse.ArgumentParser(description="CRNN Training Parameters")
     parser.add_argument("--cp_path", type=str, default=None, help="Configuration  checkpoint path.")
     parser.add_argument("--epochs", type=int, default=10, help="Number of training loop epochs.")
     parser.add_argument("--lr", type=float, default=0.0005, help="Training initial learning rate.")
@@ -134,7 +134,7 @@ def main():
         'val_accuracy': val_accs
     })
     
-    save_dir = os.path.join('runs', 'crnn_train')
+    save_dir = os.path.join('runs', 'crnn')
     os.makedirs(save_dir, exist_ok=True)
 
     save_path = os.path.join(save_dir, 'train')

@@ -1,15 +1,10 @@
 import torch
-from torch import nn
-import numpy as np
-from tqdm import tqdm
 from PIL import Image
 import time
-
-from crnn_dataset import get_split, TRDataset, preprocess
+import argparse
+from crnn_dataset import TRDataset, preprocess
 from crnn_model import CRNN
 from crnn_decoder import ctc_decode
-
-import argparse
 
 def get_input_args():
     """
@@ -18,12 +13,23 @@ def get_input_args():
     Returns:
         argparse.Namespace: Parsed arguments.
     """
-    parser = argparse.ArgumentParser(description="YOLOv8 Dataset Generator")
+    parser = argparse.ArgumentParser(description="CRNN Text Recognition Prediction")
     parser.add_argument("--cp_path", type=str, default=None, help="Configuration checkpoint path.")
     parser.add_argument("--source", type=str, default=None, help="Prediction source path.")
     return parser.parse_args()
 
 def predict(crnn, data_loader, label2char=None):
+    """
+    Perform text prediction using the CRNN model.
+
+    Args:
+        crnn (CRNN): The CRNN model.
+        data_loader (iterable): DataLoader containing input images.
+        label2char (dict): Mapping from label index to character.
+
+    Returns:
+        list: List of predicted texts.
+    """
     crnn.eval()
     with torch.no_grad():
         for data in data_loader:
@@ -34,10 +40,7 @@ def predict(crnn, data_loader, label2char=None):
             log_probs = torch.nn.functional.log_softmax(logits, dim=2)
             
             preds = ctc_decode(log_probs, label2char=label2char)
-            texts = []
-            for pred in preds:
-                text = ''.join(pred)
-                texts.append(text)
+            texts = [''.join(pred) for pred in preds]
     
     return texts
 
@@ -51,20 +54,21 @@ def main():
     
     if reload_checkpoint:
         config = torch.load(reload_checkpoint, map_location=device)
-    else :
+    else:
         print("No checkpoint loaded, using default configuration.")
         config = {
-            'state_dict' : None,
-            'img_height' : 32,
-            'img_width' : 100,
-            'batch_size' : 64,
-            'root_dir' : "datasets/TR_100k",
-            'labels' : "labels.csv",
-            'splits' : [0.98,0.01,0.01],
-            'map_to_seq' : 64,
-            'rnn_hidden' : 256
+            'state_dict': None,
+            'img_height': 32,
+            'img_width': 100,
+            'batch_size': 64,
+            'root_dir': "datasets/TR_100k",
+            'labels': "labels.csv",
+            'splits': [0.98, 0.01, 0.01],
+            'map_to_seq': 64,
+            'rnn_hidden': 256
         }
     
+    # Preprocess input image
     img = preprocess(img, config['img_height'], config['img_width'])
     img = img.unsqueeze(0)
     
@@ -81,8 +85,9 @@ def main():
     
     results = predict(crnn, [img], TRDataset.LABEL2CHAR)
     end = time.perf_counter()
-    print(f"Prediction in {end-start} s")
-    print(f"Results : {results[0]}")
+    
+    print(f"Prediction in {end - start} seconds")
+    print(f"Results: {results[0]}")
     
 if __name__ == "__main__":
-    main()   
+    main()
