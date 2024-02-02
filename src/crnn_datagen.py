@@ -7,6 +7,9 @@ import re
 from PIL import Image
 from tqdm import tqdm
 
+# Example Usage
+# python src/crnn_datagen.py --source_dir datasets/archive --dest_dir datasets/cropped_text --total_images 10000
+
 def get_input_args():
     """
     Get command-line arguments using argparse.
@@ -14,9 +17,9 @@ def get_input_args():
     Returns:
         argparse.Namespace: Parsed arguments.
     """
-    parser = argparse.ArgumentParser(description="YOLOv8 Dataset Generator")
-    parser.add_argument("--source_dir", type=str, default='../datasets/archive', help="Source directory path")
-    parser.add_argument("--dest_dir", type=str, default='../datasets/cropped_text', help="Destination directory path")
+    parser = argparse.ArgumentParser(description="CRNN Text Recognition Dataset Generator")
+    parser.add_argument("--source_dir", type=str, default='datasets/archive', help="Source directory path")
+    parser.add_argument("--dest_dir", type=str, default='datasets/TR_CRNN', help="Destination directory path")
     parser.add_argument("--total_images", type=int, default=10000, help="Total number of images")
     return parser.parse_args()
 

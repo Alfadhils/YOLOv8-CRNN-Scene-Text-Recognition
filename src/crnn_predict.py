@@ -1,10 +1,16 @@
 import torch
 from PIL import Image
 import time
-import argparse
+
 from crnn_dataset import TRDataset, preprocess
 from crnn_model import CRNN
 from crnn_decoder import ctc_decode
+
+import argparse
+
+# Example Usage
+# python src/crnn_predict.py --cp_path checkpoints/crnn_s100k.pt --source demo/TR_Harris.png
+
 
 def get_input_args():
     """
@@ -14,8 +20,8 @@ def get_input_args():
         argparse.Namespace: Parsed arguments.
     """
     parser = argparse.ArgumentParser(description="CRNN Text Recognition Prediction")
-    parser.add_argument("--cp_path", type=str, default=None, help="Configuration checkpoint path.")
-    parser.add_argument("--source", type=str, default=None, help="Prediction source path.")
+    parser.add_argument("--cp_path", type=str, default='checkpoints/crnn_s100k.pt', help="Configuration checkpoint path.")
+    parser.add_argument("--source", type=str, default='demo/TR_Harris.png', help="Prediction source path.")
     return parser.parse_args()
 
 def predict(crnn, data_loader, label2char=None):
@@ -68,7 +74,6 @@ def main():
             'rnn_hidden': 256
         }
     
-    # Preprocess input image
     img = preprocess(img, config['img_height'], config['img_width'])
     img = img.unsqueeze(0)
     

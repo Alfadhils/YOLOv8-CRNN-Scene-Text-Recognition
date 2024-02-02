@@ -10,6 +10,10 @@ from crnn_evaluate import evaluate
 
 import argparse
 
+# Example Usage 
+# python src/crnn_train.py --epochs 10 --lr 0.0005 --batch_size 64 --show_interval 100 
+# To finetune a pretrained model, add --cp_path arguments e.g. checkpoints/crnn_synth_config.pt
+
 def get_input_args():
     """
     Get command-line arguments using argparse.
@@ -18,7 +22,7 @@ def get_input_args():
         argparse.Namespace: Parsed arguments.
     """
     parser = argparse.ArgumentParser(description="CRNN Training Parameters")
-    parser.add_argument("--cp_path", type=str, default=None, help="Configuration  checkpoint path.")
+    parser.add_argument("--cp_path", type=str, default='checkpoints/crnn_synth_config.pt', help="Configuration  checkpoint path.")
     parser.add_argument("--epochs", type=int, default=10, help="Number of training loop epochs.")
     parser.add_argument("--lr", type=float, default=0.0005, help="Training initial learning rate.")
     parser.add_argument("--batch_size", type=int, default=64, help="Number of samples per batch.")
@@ -26,6 +30,19 @@ def get_input_args():
     return parser.parse_args()
 
 def train_batch(crnn, data, optimizer, criterion, device):
+    """
+    Train the CRNN model for one batch.
+
+    Args:
+        crnn (torch.nn.Module): The CRNN model.
+        data (tuple): A tuple containing input images, targets, and target lengths.
+        optimizer (torch.optim.Optimizer): The optimizer for updating model parameters.
+        criterion (torch.nn.Module): The loss criterion.
+        device (torch.device): The device on which to perform computations.
+
+    Returns:
+        float: The loss value for the current batch.
+    """
     crnn.train()
     images, targets, target_lengths = [d.to(device) for d in data]
 
@@ -43,6 +60,53 @@ def train_batch(crnn, data, optimizer, criterion, device):
     torch.nn.utils.clip_grad_norm_(crnn.parameters(), 5) # gradient clipping with 5
     optimizer.step()
     return loss.item()
+
+def run_training_loop(crnn, train_loader, val_loader, optimizer, criterion, device, epochs, show_interval):
+    """
+    Run the training loop for the CRNN model.
+
+    Args:
+        crnn (torch.nn.Module): The CRNN model.
+        train_loader (torch.utils.data.DataLoader): DataLoader for training data.
+        val_loader (torch.utils.data.DataLoader): DataLoader for validation data.
+        optimizer (torch.optim.Optimizer): The optimizer for updating model parameters.
+        criterion (torch.nn.Module): The loss criterion.
+        device (torch.device): The device on which to perform computations.
+        epochs (int): The number of training epochs.
+        show_interval (int): Interval for printing training loss during an epoch.
+
+    Returns:
+        tuple: Lists of training losses, validation losses, and validation accuracies for each epoch.
+    """
+    train_losses = []
+    val_losses = []
+    val_accs = []
+
+    for epoch in range(1, epochs + 1):
+        print(f'EPOCH [{epoch}/{epochs}]')
+        run_train_loss = 0.
+        run_train_count = 0
+
+        step = 1
+        for train_data in train_loader:
+            loss = train_batch(crnn, train_data, optimizer, criterion, device)
+            train_size = train_data[0].size(0)
+            run_train_loss += loss
+            run_train_count += train_size
+            if step % show_interval == 0:
+                print(f'Running Train Loss [{step}/{len(train_loader)}] : {run_train_loss / run_train_count:.2f}')
+
+            step += 1
+
+        train_loss = run_train_loss / run_train_count
+        eval = evaluate(crnn, val_loader, criterion)
+
+        print(f"EPOCH [{epoch}/{epochs}] => Train Loss : {train_loss:.4f} | Val Loss : {eval['loss']:.4f}, Val Acc: {eval['acc']}")
+        train_losses.append(train_loss)
+        val_losses.append(eval['loss'])
+        val_accs.append(eval['acc'])
+
+    return train_losses, val_losses, val_accs
 
 def main():
     args = get_input_args()
@@ -94,32 +158,9 @@ def main():
     
     print(f"Training [{config['root_dir']}] using {device} for {epochs} epochs")
     
-    train_losses = []
-    val_losses = []
-    val_accs = []
-    for epoch in range(1,epochs+1):
-        print(f'EPOCH [{epoch}/{epochs}]')
-        run_train_loss = 0.
-        run_train_count = 0
-        
-        step = 1
-        for train_data in train_loader:
-            loss = train_batch(crnn, train_data, optimizer, criterion, device)
-            train_size = train_data[0].size(0)
-            run_train_loss += loss
-            run_train_count += train_size
-            if step%show_interval == 0:
-                print(f'Running Train Loss [{step}/{len(train_loader)}] : {run_train_loss/run_train_count :.2f}')
-            
-            step += 1
-        
-        train_loss = loss / train_size
-        eval = evaluate(crnn, val_loader, criterion)
-        
-        print(f"EPOCH [{epoch}/{epochs}] => Train Loss : {train_loss:.4f} | Val Loss : {eval['loss']:.4f}, Val Acc: { eval['acc']}")
-        train_losses.append(train_loss)
-        val_losses.append(eval['loss'])
-        val_accs.append(eval['acc'])
+    train_losses, val_losses, val_accs = run_training_loop(crnn, train_loader, val_loader, 
+                                                           optimizer, criterion, device,
+                                                           epochs, show_interval)
 
     print('[Evaluation]')
     final_eval = evaluate(crnn, val_loader, criterion)

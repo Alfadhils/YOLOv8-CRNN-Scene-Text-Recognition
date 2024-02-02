@@ -47,7 +47,6 @@ def ctc_decode(log_probs, label2char=None, blank=0):
     Returns:
     - list: List of decoded sequences after CTC decoding.
     """
-    # Transpose log_probs for convenient iteration over time steps
     emission_log_probs = np.transpose(log_probs.cpu().numpy(), (1, 0, 2))
     
     decoded_list = []

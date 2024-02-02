@@ -8,6 +8,9 @@ from crnn_decoder import ctc_decode
 
 import argparse
 
+# Example Usage
+# python src/crnn_evaluate.py --cp_path checkpoints/crnn_s100k.pt
+
 def get_input_args():
     """
     Get command-line arguments using argparse.
@@ -16,7 +19,7 @@ def get_input_args():
         argparse.Namespace: Parsed arguments.
     """
     parser = argparse.ArgumentParser(description="YOLOv8 Dataset Generator")
-    parser.add_argument("--cp_path", type=str, default=None, help="Configuration checkpoint path.")
+    parser.add_argument("--cp_path", type=str, default='checkpoints/crnn_s100k.pt', help="Configuration checkpoint path.")
     return parser.parse_args()
 
 def evaluate(crnn, dataloader, criterion, max_iter=None):
