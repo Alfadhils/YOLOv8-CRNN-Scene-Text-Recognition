@@ -21,7 +21,7 @@ Download or use the Kaggle API to download and extract the dataset. initialize t
 
 ## Workflow
 The project workflow is straightforward: Given an image, text detection and recognition are performed through YOLOv8 and CRNN models, respectively. The process involves the detection and extraction of texts using YOLOv8, storing the resulting texts as a collection of cropped text images. These cropped images serve as input for the CRNN model, which recognizes all the text within them. The final results are then plotted on the original image. The illustration of the workflow is presented below:
-![workflow](images\workflow.png)
+![workflow](images/workflow.png)
 
 
 ## Scripts and Notebooks
