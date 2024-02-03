@@ -1,5 +1,6 @@
 datasets/
 demo/street_result.avi
 demo/street_yolo.avi
+demo/street_result_comp.m4v
 runs/
 src/__pycache__
