@@ -87,6 +87,8 @@ python src/predict.py --detector checkpoints/yolov8_5k.pt --recognizer checkpoin
 python src/predict.py --detector checkpoints/yolov8_5k.pt --recognizer checkpoints/crnn_s100k.pt --source demo/street.mp4
 ```
 
+The demo video is a portion of streetview video from Walking Around youtube channel. The full video can be accessed [here](https://www.youtube.com/watch?v=_2oJYWBFdMg) 
+
 ## Results 
 1. YOLOv8 Small Model for Text Detection
    - **Training Details:**
@@ -117,7 +119,7 @@ python src/predict.py --detector checkpoints/yolov8_5k.pt --recognizer checkpoin
    - **Accuracy:**
       - Validation Accuracy: 58%
 
-for more information about training and dataset generation refer to source code.
+for more information about training, evaluation, and dataset generation refer to source code.
 
 ## Dependencies
 
